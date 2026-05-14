@@ -1,0 +1,72 @@
+name: Deploy App to Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            # Navigate to app directory
+            cd ~/devops-app || mkdir -p ~/devops-app && cd ~/devops-app
+            
+            # Pull latest code
+            if [ -d .git ]; then
+              git pull origin main
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+            
+            # Build Docker image
+            echo "Building Docker image..."
+            docker build -t devops-app:latest .
+            
+            # Stop and remove old container if running
+            echo "Stopping old container..."
+            docker stop devops-app || true
+            docker rm devops-app || true
+            
+            # Run new container
+            echo "Starting new container..."
+            docker run -d \
+              --name devops-app \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              devops-app:latest
+            
+            # Wait for container to start
+            sleep 2
+            
+            # Check if container is running
+            if docker ps | grep -q devops-app; then
+              echo "✅ Deployment successful!"
+              docker ps | grep devops-app
+            else
+              echo "❌ Deployment failed - container not running"
+              docker logs devops-app
+              exit 1
+            fi
+      
+      - name: Notify Deployment Status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment completed successfully"
+          else
+            echo "❌ Deployment failed"
+          fi

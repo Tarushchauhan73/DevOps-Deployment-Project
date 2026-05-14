@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+npm-debug.log
+npm-debug.log.*
+yarn-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Build
+dist/
+build/
+coverage/
+
+# SSH Keys (NEVER COMMIT)
+*.pem
+*.key
+id_rsa*
+devops-key*
+
+# Misc
+.cache/
+.npm/
+*.log

@@ -12,12 +12,12 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
+   steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Upload Pages artifact
-        uses: uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs
 
